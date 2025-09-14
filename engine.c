@@ -101,6 +101,26 @@ Tmove Findmovethread(State *st, int free, int depth, int id){
     return tmove;
 }
 
+int Findmovet(State* st, int depth, int threadcount){
+    Tmove move = {st->move == X ? -999999 : 999999, 0};
+    Thread thread;
+    Inthread(&thread);
+    Createthreads(&thread, st, threadcount, depth);
+    for (int i = 0; i < threadcount; i++){
+        if (st->move == X){
+            if (Movelist[i].score > move.score){
+                move = Movelist[i];
+            }
+        }
+        else{
+            if (Movelist[i].score < move.score){
+                move = Movelist[i];
+            }
+        }
+    }
+    return move.move;
+}
+
 int Findmovestruct(State *st, int depth){
     Move move;
     int bestmove = -1;
