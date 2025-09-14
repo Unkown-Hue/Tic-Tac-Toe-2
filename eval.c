@@ -41,23 +41,23 @@ int Eval(int x, int o){
 		bits = x & Warray[i];
         int xcount = Count1s(x & Warray[i]);
         int ocount = Count1s(o & Warray[i]);
-		if (xcount == 2 && ocount == 0){
-			score += THREAT3;
-		}
-		if (xcount == 3 && ocount == 0){
-			score += THREAT4;
-		}
-		if (xcount == 4 && ocount == 0){
+        if (xcount == 4 && ocount == 0){
 			score += THREAT5;
 		}
-		if (ocount == 2 && xcount == 0){
-			score -= THREAT3;
+        else if (xcount == 3 && ocount == 0){
+			score += THREAT4;
 		}
-		if (ocount == 3 && xcount == 0){
+        else if (xcount == 2 && ocount == 0){
+			score += THREAT3;
+		}
+        if (ocount == 4 && xcount == 0){
+			score -= THREAT5;
+		}
+        if (ocount == 3 && xcount == 0){
 			score -= THREAT4;
 		}
-		if (ocount == 4 && xcount == 0){
-			score -= THREAT5;
+        if (ocount == 2 && xcount == 0){
+			score -= THREAT3;
 		}
 	}
     while (x){
@@ -68,5 +68,34 @@ int Eval(int x, int o){
             score -= boardbias[bit][1];
         }
     }
+	return score;
+}
+
+int Smalleval(int x, int o){
+	int score = 0;
+	int bits;
+	for (int i = 0; i < MAXWIN; i++){
+		bits = x & Warray[i];
+        int xcount = Count1s(x & Warray[i]);
+        int ocount = Count1s(o & Warray[i]);
+        if (xcount == 4 && ocount == 0){
+			score += THREAT5;
+		}
+        else if (xcount == 3 && ocount == 0){
+			score += THREAT4;
+		}
+        else if (xcount == 2 && ocount == 0){
+			score += THREAT3;
+		}
+        if (ocount == 4 && xcount == 0){
+			score -= THREAT5;
+		}
+        if (ocount == 3 && xcount == 0){
+			score -= THREAT4;
+		}
+        if (ocount == 2 && xcount == 0){
+			score -= THREAT3;
+		}
+	}
 	return score;
 }

@@ -45,7 +45,7 @@ int All(const State *st);
 
 int Full(const State *st);
 
-// function to play a move from int and make sure its legal.
+// function to play a move from int.
 void Play(State *st, const int m);
 
 // function to play a move from int and make sure its legal with return value.
@@ -65,9 +65,6 @@ void Undo(State *st);
 
 // counts all 1s in a int.
 #define Count1s(n) (__builtin_popcountll(n))
-
-// copy for using in threads.
-void Copy(State *cst, const State *st);
 
 // init array
 void Initw();

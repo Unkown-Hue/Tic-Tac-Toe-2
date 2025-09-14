@@ -79,7 +79,7 @@ void SetState(State *st){
 	st->mcount = 0;
 }
 
-// function to play a move from int and make sure its legal.
+// function to play a move from int.
 void Play(State *st, const int m){
 	st->side[st->move] |= 1 << m;
 	st->move ^= O;

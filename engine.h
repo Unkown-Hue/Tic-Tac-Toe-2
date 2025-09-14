@@ -16,7 +16,7 @@ typedef struct {
 } Pv;
 //
 // find move acording to best score for a thread.
-Tmove Findmovethread(State *st, int free, int depth, int id);
+Tmoven Findmovethread(State *st, int free, int depth, int id);
 // automate thread initiation and return the best move searched.
 int Findmovet(State *st, int depth, int threadcount);
 

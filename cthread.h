@@ -23,8 +23,20 @@ typedef struct {
 	int move;
 } Tmove;
 
+// structure to handle return value of Findmovethread -> moves score and node count.
+typedef struct {
+	int score;
+	int move;
+    unsigned long long nodes;
+} Tmoven;
+
 // array to hold all thread best moves and score.
-extern Tmove Movelist[2000];
+extern Tmoven Movelist[2000];
+// function to count threads
+int Getthreadcount();
+
+// function to count threads created 
+int Getproccescount();
 
 // function to initialize a thread.
 void Inthread(Thread *thread);

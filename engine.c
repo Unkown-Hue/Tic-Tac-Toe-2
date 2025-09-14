@@ -5,6 +5,7 @@
 #include <winbase.h>
 #define GDBUG
 
+#define LAZY_SORT_TOP 2
 
 void Extract(Move *move, int num){
     move->size = 0;
@@ -56,8 +57,50 @@ void SortO(int x, int o, Move *move){
     }
 }
 
-Tmove Findmovethread(State *st, int free, int depth, int id){
-    Tmove tmove;
+void SortlazyX(int x, int o, Move *move){
+    int i;
+    int j;
+    for (i = 0; i < move->size; i++){
+        move->score[i] = Smalleval(x | (1 << move->moves[i]), o);
+        }
+    for (i = 0; i < move->size; i++){
+        for (j = i + 1; j < move->size; j++){
+            if (move->score[j] > move->score[i]){
+                int temp = move->score[i];
+                move->score[i] = move->score[j];
+                move->score[j] = temp;
+                temp = move->moves[i];
+                move->moves[i] = move->moves[j];
+                move->moves[j] = temp;
+            }
+        }
+    }
+}
+
+
+void SortlazyO(int x, int o, Move *move){
+    int i;
+    int j;
+    int top = move->size > LAZY_SORT_TOP ? LAZY_SORT_TOP : move->size;
+    for (i = 0; i < move->size; i++){
+        move->score[i] = Smalleval(o | (1 << move->moves[i]), x);
+        }
+    for (i = 0; i < move->size; i++){
+        for (j = i + 1; j < move->size; j++){
+            if (move->score[j] > move->score[i]){
+                int temp = move->score[i];
+                move->score[i] = move->score[j];
+                move->score[j] = temp;
+                temp = move->moves[i];
+                move->moves[i] = move->moves[j];
+                move->moves[j] = temp;
+            }
+        }
+    }
+}
+
+Tmoven Findmovethread(State *st, int free, int depth, int id){
+    Tmoven tmove;
     Move move;
     int bestmove = -1;
     int score;
@@ -98,11 +141,12 @@ Tmove Findmovethread(State *st, int free, int depth, int id){
     //printf("nodes searched: %d from id: %d\n", nodes, id);
     tmove.move = bestmove;
     tmove.score = st->move == X ? alpha : beta;
+    tmove.nodes = nodes;
     return tmove;
 }
 
 int Findmovet(State* st, int depth, int threadcount){
-    Tmove move = {st->move == X ? -999999 : 999999, 0};
+    Tmoven move = {st->move == X ? -999999 : 999999, 0, 0};
     Thread thread;
     Inthread(&thread);
     Createthreads(&thread, st, threadcount, depth);
@@ -118,6 +162,7 @@ int Findmovet(State* st, int depth, int threadcount){
             }
         }
     }
+    free(thread.thread);
     return move.move;
 }
 

@@ -2,8 +2,36 @@
 #include "cthread.h"
 #include "engine.h"
 
+#include <tlhelp32.h>
+#include <stdio.h>
+
 // array to hold all thread best moves and score.
-Tmove Movelist[2000];
+Tmoven Movelist[2000];
+
+int Getproccescount() {
+    DWORD pid = GetCurrentProcessId();
+    HANDLE hthreadsnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    THREADENTRY32 te;
+    te.dwSize = sizeof(THREADENTRY32);
+    int count = 0;
+
+    if (Thread32First(hthreadsnap, &te)) {
+        do {
+            if (te.th32OwnerProcessID == pid) {
+                count++;
+            }
+        } while (Thread32Next(hthreadsnap, &te));
+    }
+
+    CloseHandle(hthreadsnap);
+    return count;
+}
+
+int Getthreadcount() {
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+}
 
 DWORD WINAPI Threadedsearch(LPVOID lparam){
 	Threadparam *param = (Threadparam*)lparam;

@@ -1,5 +1,6 @@
 #include <time.h>
 
+#include "cthread.h"
 #include "game.h"
 #include "engine.h"
 #include "loop.h"
@@ -50,7 +51,8 @@ void PlayGame(){
     char *line;
     int player;
     int depth = 5;
-    int threadcount = 8;
+    int threadcount = Getthreadcount();
+    //printf("Thread count %d\n", threadcount);
     clock_t start, end;
     start = clock();
     printf("Play as x or o [x/o]: ");
