@@ -4,6 +4,8 @@
 int Warray[28];
 const int *pW = Warray;
 
+unsigned long long Zobrist[2][25];
+
 // function to get if the game is full or not.
 int Full(const State *st){
 	return ((st->side[X] | st->side[O]) ^ MAXBIT) == 0;
@@ -15,6 +17,7 @@ int All(const State *st){
 }
 
 void Initw(){
+	srand(time(NULL) ^ clock());
 	int i = 0;
 	int j = 15;
 	int k;
@@ -69,6 +72,12 @@ void Initw(){
 	Warray[i++] = k;
 	k <<= 1;
 	Warray[i++] = k;
+	// Zobrist hashing init
+	for (int side = 0; side < 2; side++){
+		for (int pos = 0; pos < 25; pos++){
+			Zobrist[side][pos] = ((unsigned long long)rand() << 32) | rand();
+		}
+	}
 }
 
 // basically a constructor. to set defualt value at start.
@@ -77,14 +86,17 @@ void SetState(State *st){
 	st->side[O] = 0;
 	st->move = X;
 	st->mcount = 0;
+	st->hash = 0;
 }
 
 // function to play a move from int.
 void Play(State *st, const int m){
+	st->hash ^= Zobrist[st->move][m];
 	st->side[st->move] |= 1 << m;
 	st->move ^= O;
 	st->Marray[st->mcount] = 1 << m;
 	st->mcount++;
+	
 }
 
 // function to play a move from int and make sure its legal.
@@ -127,6 +139,7 @@ void Undo(State *st){
 	st->mcount--;
 	st->move ^= O;
 	st->side[st->move] ^= st->Marray[st->mcount];
+	st->hash ^= Zobrist[st->move][Poplsb(&st->Marray[st->mcount])];
 }
 
 int Poplsb(int *n){

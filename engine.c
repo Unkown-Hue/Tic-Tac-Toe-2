@@ -1,9 +1,6 @@
 #include "engine.h"
 #include "eval.h"
 #include "cthread.h"
-#include <minwindef.h>
-#include <winbase.h>
-#define GDBUG
 
 #define LAZY_SORT_TOP 2
 

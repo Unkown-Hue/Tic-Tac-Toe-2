@@ -49,7 +49,7 @@ int main(){
     Initw();
     int threadcount = Getthreadcount();
     int depth = 6;
-    int depth2 = 8;
+    int depth2 = 11;
     clock_t start, end;
     start = clock();
     uint64 nodes = Perft(&st, depth);
@@ -60,7 +60,7 @@ int main(){
     printf("Time: %.3f seconds\n", elapsed);
     printf("Speed: %.2f nodes/sec\n\n", nodes / elapsed);
     start = clock();
-    nodes = Perftalpha(&st, depth + 2, threadcount);
+    nodes = Perftalpha(&st, depth2, threadcount);
     end = clock();
     elapsed = (double)(end - start) / CLOCKS_PER_SEC;
     printf("Perft: alpha beta perft\n");

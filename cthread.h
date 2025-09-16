@@ -1,13 +1,39 @@
 #ifndef THREAD_H
 #define THREAD_H
-#include <windows.h>
+
 #include "game.h"
+
+#ifdef _Win32
+#include <windows.h>
+#include <tlhelp32.h>
 
 // structure to handle threads.
 typedef struct {
 	HANDLE *thread;
 	int size;
 } Thread;
+// function to initialize a thread.
+void Inthread(Thread *thread);
+// function to create threads.
+void Createthreads(Thread *thread, State *st, int size, int depth);
+
+#elif __linux__
+#include <pthread.h>
+
+typedef struct {
+	pthread_t *thread;
+	int size;
+} Thread;
+// function to initialize a thread.
+void Inthread(Thread *thread);
+// function to create threads.
+void Createthreads(Thread *thread, State *st, int size, int depth);
+
+#endif
+
+#include "game.h"
+
+
 
 // structure to handle threads.
 typedef struct {
@@ -37,11 +63,5 @@ int Getthreadcount();
 
 // function to count threads created 
 int Getproccescount();
-
-// function to initialize a thread.
-void Inthread(Thread *thread);
-
-// function to create threads.
-void Createthreads(Thread *thread, State *st, int size, int depth);
 
 #endif // THREAD_H

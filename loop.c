@@ -1,4 +1,7 @@
 #include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "cthread.h"
 #include "game.h"

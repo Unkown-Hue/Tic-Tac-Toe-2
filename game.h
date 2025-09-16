@@ -7,6 +7,8 @@
 
 //Global array of all win patterns
 extern int Warray[28];
+// Hash keys for zobrist hashing.
+extern unsigned long long Zobrist[2][25];
 
 // macro to define the max amount of squares in a 5x5.
 #define MAXGRID 25
@@ -16,7 +18,7 @@ extern int Warray[28];
 // macro to set defualt on a state.
 
 // made to be able to use as a boolean. and allocating unsigned char for space.
-typedef enum SIDE : unsigned char { X = 0, O = 1 } SIDE;
+typedef enum SIDE { X = 0, O = 1 } SIDE;
 
 // struct for keeping the state of a position.
 typedef struct {
@@ -28,6 +30,8 @@ typedef struct {
 	int Marray[MAXGRID];
 	// move count for the array.
 	int mcount;
+	// hash array for zobrist hashing.
+	unsigned long long hash;
 } State;
 
 // structure for debuging purposes.
