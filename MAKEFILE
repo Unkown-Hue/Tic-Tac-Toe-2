@@ -1,4 +1,4 @@
 all:
-	gcc main.c thread.c loop.c eval.c engine.c game.c -o main
+	gcc main.c thread.c loop.c eval.c engine.c game.c tt.c -o main
 
-gcc benchmark.c thread.c loop.c eval.c engine.c game.c -o benchmark
+gcc benchmark.c thread.c loop.c eval.c engine.c game.c tt.c -o benchmark

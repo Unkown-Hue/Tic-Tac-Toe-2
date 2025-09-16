@@ -53,7 +53,7 @@ void PlayGame(){
 	int move;
     char *line;
     int player;
-    int depth = 5;
+    int depth = 8;
     int threadcount = Getthreadcount();
     //printf("Thread count %d\n", threadcount);
     clock_t start, end;

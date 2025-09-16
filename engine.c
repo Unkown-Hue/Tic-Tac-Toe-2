@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "eval.h"
 #include "cthread.h"
+#include "tt.h"
 
 #define LAZY_SORT_TOP 2
 
@@ -106,13 +107,15 @@ Tmoven Findmovethread(State *st, int free, int depth, int id){
     int beta = 999999;
     int nodes = 0;
     int i = 0;
+    Ttable tt;
+    Intt(&tt);
     Extract(&move, free);
     if (st->move == X){
         SortX(st->side[X], st->side[O], &move);
         while (i < move.size){
             bit = move.moves[i];
         	Play(st, bit);
-        	score = nMinimax(st, alpha, beta, &nodes, depth - 1, 0);
+        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 0);
         	Undo(st);
         	if (score > alpha){
         		bestmove = bit;
@@ -126,7 +129,7 @@ Tmoven Findmovethread(State *st, int free, int depth, int id){
         while (i < move.size){
             bit = move.moves[i];
         	Play(st, bit);
-        	score = nMinimax(st, alpha, beta, &nodes, depth - 1, 1);
+        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 1);
         	Undo(st);
         	if (score < beta){
         		bestmove = bit;
@@ -267,3 +270,76 @@ int nMinimax(State *st, int alpha, int beta, int *nodes, int depth, int ismax){
     }
 }
 
+int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int ismax){
+	*nodes = *nodes + 1;
+    Key key = Gettablekey(st->hash, tt->size);
+    if (tt->table[key].move != -1){
+        return tt->table[key].score;
+    }
+    if (Win(st, X)) {
+        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].score = 1000 + depth * 20;
+        return 1000 + depth * 20;
+    }
+    if (Win(st, O)) {
+        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].score = -1000 - depth * 20;
+        return -1000 - depth * 20;
+    }
+    if (Full(st)){
+        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].score = 0;
+		return 0;
+	}
+	if (depth <= 0){
+		/*
+		printf("Minimax\n");
+		Printboard(st);
+		printbin(st->side[side]);
+		printbin(st->side[side ^ O]);
+		printf("Score: %d\n", Eval(&st->side[side], &st->side[side ^ O]));
+		*/
+        int eval = Eval(st->side[X], st->side[O]);
+        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].score = eval;
+		return eval;
+	}
+	// do maximizing and call mimimin
+    Move move;
+	int free = All(st) ^ MAXBIT;
+	int bit;
+    int score;
+    int i = 0;
+    SIDE side = st->move;
+    Extract(&move, free);
+    if (ismax){
+        SortX(st->side[X], st->side[O], &move);
+        while (i < move.size){
+            bit = move.moves[i];
+   	        Play(st, bit);
+	        score = ttMinimax(st, tt, alpha, beta, nodes, depth - 1, 0);
+	        Undo(st);
+	        if (score > alpha){
+	    	    alpha = score;
+	        }
+	        if (beta <= alpha) break;
+            i++;
+        }
+	    return alpha;
+    }
+    else {
+        SortO(st->side[X], st->side[O], &move);
+        while (i < move.size){
+            bit = move.moves[i];
+   	        Play(st, bit);
+	    	score = ttMinimax(st, tt, alpha, beta ,nodes, depth - 1, 1);
+	    	Undo(st);
+	    	if (score < beta){
+	    		beta = score;
+	    	}
+	    	if (beta <= alpha) break;
+            i++;
+       }
+	    return beta;
+    }
+}

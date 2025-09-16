@@ -1,4 +1,5 @@
-
+#include <stdlib.h>
+#include <string.h>
 
 #include "tt.h"
 
@@ -9,8 +10,10 @@ void Intt(Ttable *tt){
     
 }
 void Rett(Ttable *tt){
-    memset(tt->table, 0, sizeof(Table) * tt->size);
+    for (int i = 0; i < tt->size; i++){
+        tt->table[i].move = -1;
+    }
 }
-inline Key Gettablekey(unsigned long long hash, int size){
+Key Gettablekey(unsigned long long hash, int size){
     return hash % size;
 }

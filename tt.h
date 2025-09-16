@@ -23,6 +23,7 @@ void Intt(Ttable *tt);
 
 void Rett(Ttable *tt);
 
-inline Key Gettablekey(unsigned long long hash, int size);
+Key Gettablekey(unsigned long long hash, int size);
+
 
 #endif // TT_H

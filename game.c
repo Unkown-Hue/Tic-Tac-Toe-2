@@ -1,4 +1,6 @@
 // game.c
+#include <time.h>
+
 #include "game.h"
 
 int Warray[28];
@@ -140,6 +142,13 @@ void Undo(State *st){
 	st->move ^= O;
 	st->side[st->move] ^= st->Marray[st->mcount];
 	st->hash ^= Zobrist[st->move][Poplsb(&st->Marray[st->mcount])];
+}
+int Lsb(int n){
+	int bit;
+	for (bit = 0; bit < 25; bit++){
+		if ((1 << bit) & n) break;
+	}
+	return bit;
 }
 
 int Poplsb(int *n){
