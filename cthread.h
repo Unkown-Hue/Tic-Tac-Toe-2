@@ -3,15 +3,18 @@
 
 #include "game.h"
 
-#ifdef _Win32
+typedef struct Thread Thread;
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #include <windows.h>
 #include <tlhelp32.h>
 
+
 // structure to handle threads.
-typedef struct {
+struct Thread {
 	HANDLE *thread;
 	int size;
-} Thread;
+};
 // function to initialize a thread.
 void Inthread(Thread *thread);
 // function to create threads.
@@ -20,10 +23,10 @@ void Createthreads(Thread *thread, State *st, int size, int depth);
 #elif __linux__
 #include <pthread.h>
 
-typedef struct {
+struct Thread {
 	pthread_t *thread;
 	int size;
-} Thread;
+};
 // function to initialize a thread.
 void Inthread(Thread *thread);
 // function to create threads.
@@ -31,15 +34,12 @@ void Createthreads(Thread *thread, State *st, int size, int depth);
 
 #endif
 
-#include "game.h"
-
-
-
 // structure to handle threads.
 typedef struct {
 	int amount;
 	int depth;
 	State st;
+    unsigned long long tablesize;
 	char id;
 } Threadparam;
 

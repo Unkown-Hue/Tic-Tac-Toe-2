@@ -20,17 +20,17 @@ typedef struct {
 } Pv;
 //
 // find move acording to best score for a thread.
-Tmoven Findmovethread(State *st, int free, int depth, int id);
+Tmoven Findmovethread(State *st, int wfree, int depth, uint64_t tablesize, int id);
 // automate thread initiation and return the best move searched.
 int Findmovet(State *st, int depth, int threadcount);
 
 int Lsb(int n);
 
 // struct
-int Findmovestruct(State *st, int depth);
+Tmoven Findmovestruct(State *st, int depth);
 
 int nMinimax(State *st, int alpha, int beta, int *nodes, int depth, int ismax);
 
-int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int ismax);
+int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int fulldepth, int ismax);
 
 #endif // ENGINE_H

@@ -1,6 +1,9 @@
+#include <stdio.h>
+
 #include "engine.h"
 #include "eval.h"
 #include "cthread.h"
+#include "game.h"
 #include "tt.h"
 
 #define LAZY_SORT_TOP 2
@@ -97,7 +100,7 @@ void SortlazyO(int x, int o, Move *move){
     }
 }
 
-Tmoven Findmovethread(State *st, int free, int depth, int id){
+Tmoven Findmovethread(State *st, int wfree, int depth, uint64_t tablesize, int id){
     Tmoven tmove;
     Move move;
     int bestmove = -1;
@@ -108,14 +111,14 @@ Tmoven Findmovethread(State *st, int free, int depth, int id){
     int nodes = 0;
     int i = 0;
     Ttable tt;
-    Intt(&tt);
-    Extract(&move, free);
+    Intt(&tt, tablesize);
+    Extract(&move, wfree);
     if (st->move == X){
         SortX(st->side[X], st->side[O], &move);
         while (i < move.size){
             bit = move.moves[i];
         	Play(st, bit);
-        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 0);
+        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 1, 0);
         	Undo(st);
         	if (score > alpha){
         		bestmove = bit;
@@ -129,7 +132,7 @@ Tmoven Findmovethread(State *st, int free, int depth, int id){
         while (i < move.size){
             bit = move.moves[i];
         	Play(st, bit);
-        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 1);
+        	score = ttMinimax(st, &tt, alpha, beta, &nodes, depth - 1, 1, 1);
         	Undo(st);
         	if (score < beta){
         		bestmove = bit;
@@ -142,6 +145,8 @@ Tmoven Findmovethread(State *st, int free, int depth, int id){
     tmove.move = bestmove;
     tmove.score = st->move == X ? alpha : beta;
     tmove.nodes = nodes;
+    free(tt.table);
+    printf("\nTbhits: %llu\n", tt.hit);
     return tmove;
 }
 
@@ -166,17 +171,18 @@ int Findmovet(State* st, int depth, int threadcount){
     return move.move;
 }
 
-int Findmovestruct(State *st, int depth){
+Tmoven Findmovestruct(State *st, int depth){
+    Tmoven tmove;
     Move move;
     int bestmove = -1;
     int score;
-    int free = All(st) ^ MAXBIT;
     int alpha = -999999;
     int bit;
     int beta = 999999;
     int nodes = 0;
+    int wfree = All(st) ^ MAXBIT;
     int i = 0;
-    Extract(&move, free);
+    Extract(&move, wfree);
     if (st->move == X){
         SortX(st->side[X], st->side[O], &move);
         while (i < move.size){
@@ -188,6 +194,7 @@ int Findmovestruct(State *st, int depth){
         		bestmove = bit;
         		alpha = score;
         	}
+            if (alpha >= beta) break;
             i++;
         }
     }
@@ -202,11 +209,15 @@ int Findmovestruct(State *st, int depth){
         		bestmove = bit;
         		beta = score;
         	}
+            if (alpha >= beta) break;
             i++;
         }
     }
-    printf("nodes searched: %d\n", nodes);
-    return bestmove;
+    //printf("nodes searched: %d from id: %d\n", nodes, id);
+    tmove.move = bestmove;
+    tmove.score = st->move == X ? alpha : beta;
+    tmove.nodes = nodes;
+    return tmove;
 }
 
 int nMinimax(State *st, int alpha, int beta, int *nodes, int depth, int ismax){
@@ -270,24 +281,28 @@ int nMinimax(State *st, int alpha, int beta, int *nodes, int depth, int ismax){
     }
 }
 
-int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int ismax){
+int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int fulldepth, int ismax){
 	*nodes = *nodes + 1;
     Key key = Gettablekey(st->hash, tt->size);
-    if (tt->table[key].move != -1){
+    if (tt->table[key].hash == st->hash && tt->table[key].depth >= fulldepth){
+        tt->hit++;
         return tt->table[key].score;
     }
     if (Win(st, X)) {
-        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].hash = st->hash;
+        tt->table[key].depth = fulldepth;
         tt->table[key].score = 1000 + depth * 20;
         return 1000 + depth * 20;
     }
     if (Win(st, O)) {
-        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].hash = st->hash;
+        tt->table[key].depth = fulldepth;
         tt->table[key].score = -1000 - depth * 20;
         return -1000 - depth * 20;
     }
     if (Full(st)){
-        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].hash = st->hash;
+        tt->table[key].depth = fulldepth;
         tt->table[key].score = 0;
 		return 0;
 	}
@@ -300,16 +315,19 @@ int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth,
 		printf("Score: %d\n", Eval(&st->side[side], &st->side[side ^ O]));
 		*/
         int eval = Eval(st->side[X], st->side[O]);
-        tt->table[key].move = Lsb(st->Marray[st->mcount - 1]);
+        tt->table[key].hash = st->hash;
         tt->table[key].score = eval;
+        tt->table[key].depth = fulldepth;
 		return eval;
 	}
 	// do maximizing and call mimimin
     Move move;
+    int bestmove;
 	int free = All(st) ^ MAXBIT;
 	int bit;
     int score;
     int i = 0;
+    int cutoff = 0;
     SIDE side = st->move;
     Extract(&move, free);
     if (ismax){
@@ -317,13 +335,22 @@ int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth,
         while (i < move.size){
             bit = move.moves[i];
    	        Play(st, bit);
-	        score = ttMinimax(st, tt, alpha, beta, nodes, depth - 1, 0);
+	        score = ttMinimax(st, tt, alpha, beta, nodes, depth - 1, fulldepth + 1, 0);
 	        Undo(st);
 	        if (score > alpha){
 	    	    alpha = score;
+                bestmove = move.moves[i];
 	        }
-	        if (beta <= alpha) break;
+            if (beta <= alpha){
+                cutoff = 1;
+                break;
+            }
             i++;
+        }
+        if (!cutoff){
+            tt->table[key].hash = st->hash ^ Zobrist[st->move][bestmove];
+            tt->table[key].score = alpha;
+            tt->table[key].depth = depth;
         }
 	    return alpha;
     }
@@ -332,14 +359,22 @@ int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth,
         while (i < move.size){
             bit = move.moves[i];
    	        Play(st, bit);
-	    	score = ttMinimax(st, tt, alpha, beta ,nodes, depth - 1, 1);
+	    	score = ttMinimax(st, tt, alpha, beta ,nodes, depth - 1, fulldepth + 1, 1);
 	    	Undo(st);
 	    	if (score < beta){
 	    		beta = score;
 	    	}
-	    	if (beta <= alpha) break;
+            if (beta <= alpha){
+                cutoff = 1;
+                break;
+            }
             i++;
-       }
+        }
+        if (!cutoff){
+            tt->table[key].hash = st->hash ^ Zobrist[st->move][bestmove];
+            tt->table[key].score = beta;
+            tt->table[key].depth = depth;
+        }
 	    return beta;
     }
 }

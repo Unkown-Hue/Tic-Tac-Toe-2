@@ -7,7 +7,7 @@
 
 // array to hold all thread best moves and score.
 Tmoven Movelist[2000];
-#ifdef _Win32
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 int Getproccescount() {
     DWORD pid = GetCurrentProcessId();
     HANDLE hthreadsnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
@@ -28,7 +28,7 @@ int Getproccescount() {
 }
 DWORD WINAPI Threadedsearch(LPVOID lparam){
 	Threadparam *param = (Threadparam*)lparam;
-	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->id);
+	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->tablesize, param->id);
 	free(param);
 	return 0;
 }
@@ -77,6 +77,7 @@ void Createthreads(Thread *thread, State *st, int size, int depth){
 		param->depth = depth;
 		param->st = *st;
 		param->id = i;
+        param->tablesize = TABLESIZE / size;
 		thread->thread[i] = CreateThread(NULL, 0, (LPVOID)Threadedsearch, param,0, NULL);
 	}
     WaitForMultipleObjects(thread->size, thread->thread, TRUE, INFINITE);

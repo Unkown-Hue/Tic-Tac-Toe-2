@@ -1,0 +1,2 @@
+all:
+	gcc main.c thread.c loop.c eval.c engine.c game.c tt.c -o main

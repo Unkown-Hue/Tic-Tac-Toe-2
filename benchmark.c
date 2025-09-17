@@ -1,9 +1,8 @@
 #include <time.h>
 
 #include "cthread.h"
-#include "game.h"
 #include "engine.h"
-#include "loop.h"
+#include "game.h"
 
 typedef unsigned long long uint64;
 
@@ -28,18 +27,19 @@ uint64 Perftalpha(State *st, int depth, int threadcount){
     Inthread(&thread);
     Createthreads(&thread, st, threadcount, depth);
     for (int i = 0; i < threadcount; i++){
-        if (st->move == X){
-            if (Movelist[i].score > move.score){
-                move = Movelist[i];
-            }
-        }
-        else{
-            if (Movelist[i].score < move.score){
-                move = Movelist[i];
-            }
-        }
+        move.nodes += Movelist[i].nodes;
     }
     free(thread.thread);
+    return move.nodes;
+}
+
+uint64 Perftalphaunthreaded(State *st, int depth, int threadcount){
+    Tmoven move = Findmovethread(st, All(st) ^ MAXBIT, depth, TABLESIZE, 0);
+    return move.nodes;
+}
+
+uint64 Perftalphanott(State *st, int depth){
+    Tmoven move = Findmovestruct(st, depth);
     return move.nodes;
 }
 
@@ -48,8 +48,8 @@ int main(){
     SetState(&st);
     Initw();
     int threadcount = Getthreadcount();
-    int depth = 6;
-    int depth2 = 11;
+    int depth = 3;
+    int depth2 = 8;
     clock_t start, end;
     start = clock();
     uint64 nodes = Perft(&st, depth);
@@ -60,10 +60,18 @@ int main(){
     printf("Time: %.3f seconds\n", elapsed);
     printf("Speed: %.2f nodes/sec\n\n", nodes / elapsed);
     start = clock();
-    nodes = Perftalpha(&st, depth2, threadcount);
+    nodes = Perftalphaunthreaded(&st, depth2, threadcount);
     end = clock();
     elapsed = (double)(end - start) / CLOCKS_PER_SEC;
     printf("Perft: alpha beta perft\n");
+    printf("Perft(%d) = %llu nodes\n", depth2, nodes);
+    printf("Time: %.3f seconds\n", elapsed);
+    printf("Speed: %.2f nodes/sec\n\n", nodes / elapsed);
+    start = clock();
+    nodes = Perftalphanott(&st, depth2);
+    end = clock();
+    elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Perft: alpha beta with no tablebase perft\n");
     printf("Perft(%d) = %llu nodes\n", depth2, nodes);
     printf("Time: %.3f seconds\n", elapsed);
     printf("Speed: %.2f nodes/sec\n", nodes / elapsed);

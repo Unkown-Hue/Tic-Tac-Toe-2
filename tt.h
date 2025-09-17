@@ -5,21 +5,23 @@
 
 #include "game.h"
 
-#define TABLESIZE 1000000
+#define TABLESIZE 4000000
 
 typedef unsigned long long Key;
 
 typedef struct {
-    uint8_t move;
     uint16_t score;
+    uint64_t hash;
+    uint8_t depth;
 } Table;
 
 typedef struct {
     Table *table;
     int size;
+    uint64_t hit;
 } Ttable;
 
-void Intt(Ttable *tt);
+void Intt(Ttable *tt, unsigned long long size);
 
 void Rett(Ttable *tt);
 
