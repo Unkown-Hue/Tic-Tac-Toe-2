@@ -7,6 +7,7 @@ int Warray[28];
 const int *pW = Warray;
 
 unsigned long long Zobrist[2][25];
+unsigned long long Zobristcount[25];
 
 // function to get if the game is full or not.
 int Full(const State *st){
@@ -80,6 +81,9 @@ void Initw(){
 			Zobrist[side][pos] = ((unsigned long long)rand() << 32) | rand();
 		}
 	}
+	for (int count = 0; count < 25; count++){
+		Zobristcount[count] = ((unsigned long long)rand() << 32) | rand();
+	}
 }
 
 // basically a constructor. to set defualt value at start.
@@ -89,11 +93,13 @@ void SetState(State *st){
 	st->move = X;
 	st->mcount = 0;
 	st->hash = 0;
+	st->mhash = 0;
 }
 
 // function to play a move from int.
 void Play(State *st, const int m){
 	st->hash ^= Zobrist[st->move][m];
+	st->mhash ^= Zobristcount[st->mcount];
 	st->side[st->move] |= 1 << m;
 	st->move ^= O;
 	st->Marray[st->mcount] = 1 << m;
@@ -140,6 +146,7 @@ int Winall(const State *st){
 void Undo(State *st){
 	st->mcount--;
 	st->move ^= O;
+	st->mhash ^= Zobristcount[st->mcount];
 	st->side[st->move] ^= st->Marray[st->mcount];
 	st->hash ^= Zobrist[st->move][Poplsb(&st->Marray[st->mcount])];
 }

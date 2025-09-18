@@ -56,6 +56,14 @@ Moveinfo Perftalphanott(State *st, int depth){
     return moveinfo;
 }
 
+Moveinfo Perftalphatt(State *st, int depth){
+    Moveinfo moveinfo;
+    Tmoven move = ttFindmove(st, depth);
+    moveinfo.move = move.move;
+    moveinfo.nodes = move.nodes;
+    return moveinfo;
+}
+
 Moveinfo Perftalphava(State *st, int depth){
     Moveinfo moveinfo;
     Tmoven move = Findmovestruct(st, depth);
@@ -87,7 +95,16 @@ int main(){
     minfo = Perftalphava(&st, depth);
     end = clock();
     elapsed = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Perft: alpha beta with no tablebase perft\n");
+    printf("Perft: alpha beta perft\n");
+    printf("Perft(%d) = %llu nodes\n", depth, minfo.nodes);
+    printf("Time: %.3f seconds\n", elapsed);
+    printf("Speed: %.2f nodes/sec\n\n", minfo.nodes / elapsed);
+    printf("Best move: %d\n\n", minfo.move);
+    start = clock();
+    minfo = Perftalphatt(&st, depth);
+    end = clock();
+    elapsed = (double)(end - start) / CLOCKS_PER_SEC;
+    printf("Perft: ID + tablebase perft\n");
     printf("Perft(%d) = %llu nodes\n", depth, minfo.nodes);
     printf("Time: %.3f seconds\n", elapsed);
     printf("Speed: %.2f nodes/sec\n\n", minfo.nodes / elapsed);

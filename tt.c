@@ -21,3 +21,7 @@ void Rett(Ttable *tt){
 Key Gettablekey(unsigned long long hash, int size){
     return hash % size;
 }
+
+Key Gettablehash(State *st, int size){
+    return (st->hash ^ st->mhash) % size;
+}

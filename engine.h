@@ -31,6 +31,8 @@ Tmoven Findmovestruct(State *st, int depth);
 
 Tmoven Findmove(State *st, int depth);
 
+Tmoven ttFindmove(State *st, int depth);
+
 int nMinimax(State *st, int alpha, int beta, int *nodes, int depth, int ismax);
 
 int ttMinimax(State *st, Ttable *tt, int alpha, int beta, int *nodes, int depth, int fulldepth, int ismax);

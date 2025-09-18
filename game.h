@@ -9,6 +9,7 @@
 extern int Warray[28];
 // Hash keys for zobrist hashing.
 extern unsigned long long Zobrist[2][25];
+extern unsigned long long Zobristcount[25];
 
 // macro to define the max amount of squares in a 5x5.
 #define MAXGRID 25
@@ -32,6 +33,7 @@ typedef struct {
 	int mcount;
 	// hash array for zobrist hashing.
 	unsigned long long hash;
+	unsigned long long mhash;
 } State;
 
 // structure for debuging purposes.

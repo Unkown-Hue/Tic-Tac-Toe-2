@@ -50,7 +50,7 @@ void PlayGame(){
 	State st;
 	SetState(&st);
 	Initw();
-	int move;
+	Tmoven move;
     char *line;
     int player;
     int depth = 8;
@@ -87,25 +87,25 @@ void PlayGame(){
             if (strcmp(line, "exit") == 0){
                 break;
             }
-            move = tobit(line);
+            move.move = tobit(line);
             free(line);
-            Play(&st, move);
-	        move = Findmovet(&st, depth, threadcount);
-	    	Play(&st, move);
+            Play(&st, move.move);
+	        move = ttFindmove(&st, depth);
+	    	Play(&st, move.move);
 	    	Printboard(&st);
 	    	if (Winall(&st)){
 	    		printf("Win Detected.\n");
                break;
 	    	}
-            printf("Bot played: %d\n", move);
+            printf("Bot played: %d with score: %d\n", move.move, move.score);
 	    } while(All(&st) ^ MAXBIT);
     }
     else {
 	    do {
-	        move = Findmovet(&st, depth, threadcount);
-	    	Play(&st, move);
+	        move = ttFindmove(&st, depth);
+	    	Play(&st, move.move);
 	    	Printboard(&st);
-            printf("Bot played: %d\n", move);
+            printf("Bot played: %d with score: %d\n", move.move, move.score);
 	    	if (Winall(&st)){
 	    		printf("Win Detected.\n");
                break;
@@ -116,9 +116,9 @@ void PlayGame(){
             if (strcmp(line, "exit") == 0){
                 break;
             }
-            move = tobit(line);
+            move.move = tobit(line);
             free(line);
-            Play(&st, move);
+            Play(&st, move.move);
 	    	if (Winall(&st)){
 	    		printf("Win Detected.\n");
                break;

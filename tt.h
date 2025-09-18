@@ -5,7 +5,7 @@
 
 #include "game.h"
 
-#define TABLESIZE 4000000
+#define TABLESIZE 1 << 23
 
 typedef unsigned long long Key;
 
@@ -27,5 +27,6 @@ void Rett(Ttable *tt);
 
 Key Gettablekey(unsigned long long hash, int size);
 
+Key Gettablehash(State *st, int size);
 
 #endif // TT_H
