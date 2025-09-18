@@ -28,7 +28,7 @@ int Getproccescount() {
 }
 DWORD WINAPI Threadedsearch(LPVOID lparam){
 	Threadparam *param = (Threadparam*)lparam;
-	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->tablesize, param->id);
+	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->tablesize, 1, param->id);
 	free(param);
 	return 0;
 }
@@ -96,7 +96,7 @@ void Inthread(Thread *thread){
 }
 void *Threadedsearch(void *lparam){
 	Threadparam *param = (Threadparam*)lparam;
-	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->id);
+	Movelist[param->id] = Findmovethread(&param->st, param->amount, param->depth, param->tablesize, 1, param->id);
 	free(param);
 	return 0;
 }
@@ -137,18 +137,16 @@ void Createthreads(Thread *thread, State *st, int size, int depth){
 		param->amount = amount;
 		param->depth = depth;
 		param->st = *st;
+		param->tablesize = TABLESIZE / size;
 		param->id = i;
 		pthread_create(&thread->thread[i], NULL, Threadedsearch, param);
 	}
 	for (j = 0; j < i; j++){
 		pthread_join(thread->thread[j], NULL);
 	}
-    //WaitForMultipleObjects(thread->size, thread->thread, TRUE, INFINITE);
 }
 int Getthreadcount(){
 	return sysconf(_SC_NPROCESSORS_ONLN);
 }
 
 #endif
-
-

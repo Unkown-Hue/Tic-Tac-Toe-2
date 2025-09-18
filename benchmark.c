@@ -6,6 +6,10 @@
 
 typedef unsigned long long uint64;
 
+typedef struct {
+    int move;
+    uint64 nodes;
+} Moveinfo;
 
 uint64 Perft(State *st, int depth){
     if (depth == 0 || Winall(st) || Full(st)) return 1;
@@ -21,7 +25,8 @@ uint64 Perft(State *st, int depth){
     return nodes;
 }
 
-uint64 Perftalpha(State *st, int depth, int threadcount){
+Moveinfo Perftalpha(State *st, int depth, int threadcount){
+    Moveinfo moveinfo;
     Tmoven move = {st->move == X ? -999999 : 999999, 0, 0};
     Thread thread;
     Inthread(&thread);
@@ -30,51 +35,62 @@ uint64 Perftalpha(State *st, int depth, int threadcount){
         move.nodes += Movelist[i].nodes;
     }
     free(thread.thread);
-    return move.nodes;
+    moveinfo.move = move.move;
+    moveinfo.nodes = move.nodes;
+    return moveinfo;
 }
 
-uint64 Perftalphaunthreaded(State *st, int depth, int threadcount){
-    Tmoven move = Findmovethread(st, All(st) ^ MAXBIT, depth, TABLESIZE, 0);
-    return move.nodes;
+Moveinfo Perftalphaunthreaded(State *st, int depth, int usett){
+    Tmoven move = Findmovethread(st, All(st) ^ MAXBIT, depth, TABLESIZE, usett, 0);
+    Moveinfo moveinfo;
+    moveinfo.move = move.move;
+    moveinfo.nodes = move.nodes;
+    return moveinfo;
 }
 
-uint64 Perftalphanott(State *st, int depth){
+Moveinfo Perftalphanott(State *st, int depth){
+    Moveinfo moveinfo;
+    Tmoven move = Findmove(st, depth);
+    moveinfo.move = move.move;
+    moveinfo.nodes = move.nodes;
+    return moveinfo;
+}
+
+Moveinfo Perftalphava(State *st, int depth){
+    Moveinfo moveinfo;
     Tmoven move = Findmovestruct(st, depth);
-    return move.nodes;
+    moveinfo.move = move.move;
+    moveinfo.nodes = move.nodes;
+    return moveinfo;
 }
 
 int main(){
     State st;
+    Moveinfo minfo;
     SetState(&st);
     Initw();
     int threadcount = Getthreadcount();
-    int depth = 3;
-    int depth2 = 8;
+    int depth = 8;
     clock_t start, end;
+    double elapsed;
     start = clock();
-    uint64 nodes = Perft(&st, depth);
-    end = clock();
-    double elapsed = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Perft: regular perft\n");
-    printf("Perft(%d) = %llu nodes\n", depth, nodes);
-    printf("Time: %.3f seconds\n", elapsed);
-    printf("Speed: %.2f nodes/sec\n\n", nodes / elapsed);
-    start = clock();
-    nodes = Perftalphaunthreaded(&st, depth2, threadcount);
+    minfo = Perftalphanott(&st, depth);
     end = clock();
     elapsed = (double)(end - start) / CLOCKS_PER_SEC;
-    printf("Perft: alpha beta perft\n");
-    printf("Perft(%d) = %llu nodes\n", depth2, nodes);
+    printf("Perft: alpha beta itterave deppening\n");
+    printf("Perft(%d) = %llu nodes\n", depth, minfo.nodes);
     printf("Time: %.3f seconds\n", elapsed);
-    printf("Speed: %.2f nodes/sec\n\n", nodes / elapsed);
+    printf("Speed: %.2f nodes/sec\n\n", minfo.nodes / elapsed);
+    printf("Best move: %d\n\n", minfo.move);
+    // another
     start = clock();
-    nodes = Perftalphanott(&st, depth2);
+    minfo = Perftalphava(&st, depth);
     end = clock();
     elapsed = (double)(end - start) / CLOCKS_PER_SEC;
     printf("Perft: alpha beta with no tablebase perft\n");
-    printf("Perft(%d) = %llu nodes\n", depth2, nodes);
+    printf("Perft(%d) = %llu nodes\n", depth, minfo.nodes);
     printf("Time: %.3f seconds\n", elapsed);
-    printf("Speed: %.2f nodes/sec\n", nodes / elapsed);
-    getchar();
+    printf("Speed: %.2f nodes/sec\n\n", minfo.nodes / elapsed);
+    printf("Best move: %d\n\n", minfo.move);
     return 0;
 }

@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
     Table *table;
     int size;
-    uint64_t hit;
+    unsigned long long hit;
 } Ttable;
 
 void Intt(Ttable *tt, unsigned long long size);
